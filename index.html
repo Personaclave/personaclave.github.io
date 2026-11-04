@@ -9,8 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#f7f3ea; --bg2:#ffffff; --card:#ffffff; --line:rgba(176,137,64,.35);
-    --gold:#b08940; --gold2:#8a6a2c; --text:#1c2a64; --muted:#6b7285;
+    --bg:#070d1f; --bg2:#14204a; --card:rgba(255,255,255,.035); --line:rgba(201,169,97,.32);
+    --gold:#c9a961; --gold2:#e2cb94; --text:#f1f3f8; --muted:#9ba6c0;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
@@ -19,9 +19,9 @@
     display:flex; justify-content:center; padding:24px 16px 40px;
   }
   main{width:100%; max-width:440px; text-align:center}
-  .hero{width:100%;border-radius:16px;overflow:hidden;box-shadow:0 10px 30px rgba(28,42,100,.12);margin-bottom:24px;background:#fff}
+  .hero{width:100%;border-radius:16px;overflow:hidden;box-shadow:0 12px 40px rgba(0,0,0,.45);border:1px solid var(--line);margin-bottom:26px;background:#fff}
   .hero img{display:block;width:100%;height:auto}
-  a.btn{box-shadow:0 2px 8px rgba(28,42,100,.05)}
+  a.btn{box-shadow:none}
   h1{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:30px;letter-spacing:.5px}
   .role{color:var(--gold2);font-size:13px;letter-spacing:3px;text-transform:uppercase;margin-top:6px}
   .tag{color:var(--muted);font-size:15px;line-height:1.5;margin:18px auto 28px;max-width:340px}
@@ -32,10 +32,10 @@
     padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--card);
     transition:background .2s,border-color .2s,transform .2s;
   }
-  a.btn:hover{background:#fffaf0;border-color:var(--gold);transform:translateY(-1px)}
-  a.btn.primary{background:linear-gradient(135deg,#d4b06a,#a07a34);color:#fff;border-color:transparent}
-  a.btn.primary .sub{color:rgba(255,255,255,.85)}
-  a.btn.primary svg{stroke:#fff}
+  a.btn:hover{background:rgba(201,169,97,.08);border-color:var(--gold);transform:translateY(-1px)}
+  a.btn.primary{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent}
+  a.btn.primary .sub{color:rgba(10,17,40,.75)}
+  a.btn.primary svg{stroke:#0a1128}
   a.btn svg{flex:none;width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.6}
   .t{font-weight:500;font-size:15px}
   .sub{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;font-weight:400}
