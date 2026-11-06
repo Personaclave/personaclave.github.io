@@ -19,7 +19,11 @@
     display:flex; justify-content:center; padding:24px 16px 40px;
   }
   main{width:100%; max-width:440px; text-align:center}
-  .hero{width:86%;margin:12px auto 30px}
+  .team{position:relative;margin:-24px -16px 0;height:322px;overflow:hidden;pointer-events:none}
+  .team img{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,430px);height:auto;
+    opacity:.5;filter:saturate(.75) brightness(.9);
+    -webkit-mask-image:linear-gradient(to bottom,#000 35%,transparent 92%);mask-image:linear-gradient(to bottom,#000 35%,transparent 92%)}
+  .hero{position:relative;width:86%;margin:-104px auto 30px}
   .hero img{display:block;width:100%;height:auto}
   a.btn{box-shadow:none}
   h1{font-family:"Cormorant Garamond",serif;font-weight:600;font-size:30px;letter-spacing:.5px}
@@ -45,6 +49,7 @@
 </head>
 <body>
 <main>
+  <div class="team" aria-hidden="true"><img src="equipo.webp" alt=""></div>
   <div class="hero"><img src="aurum-logo.png" alt="AURUM Asesores Patrimoniales"></div>
   <p class="tag">Protegemos lo que impulsa tu empresa: a las personas clave, tu familia y tu patrimonio.</p>
   <div class="rule"></div>
