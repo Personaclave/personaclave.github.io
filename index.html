@@ -21,7 +21,7 @@
   main{width:100%; max-width:440px; text-align:center}
   .team{position:relative;margin:-24px -16px 0;height:322px;overflow:hidden;pointer-events:none}
   .team img{position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:min(100%,470px);height:auto;
-    opacity:.5;filter:saturate(.75) brightness(.9);
+    opacity:.78;
     -webkit-mask-image:linear-gradient(to bottom,#000 35%,transparent 92%);mask-image:linear-gradient(to bottom,#000 35%,transparent 92%)}
   .hero{position:relative;width:86%;margin:-104px auto 30px}
   .hero img{display:block;width:100%;height:auto}
@@ -42,9 +42,9 @@
     transition:background .2s,border-color .2s,transform .2s;
   }
   a.btn:hover{background:rgba(201,169,97,.08);border-color:var(--gold);transform:translateY(-1px)}
-  a.btn.primary{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent}
-  a.btn.primary .sub{color:rgba(10,17,40,.75)}
-  a.btn.primary svg{stroke:#0a1128}
+  a.btn.primary{background:linear-gradient(135deg,rgba(201,169,97,.16),rgba(201,169,97,.06));color:var(--gold2);border-color:var(--gold)}
+  a.btn.primary .sub{color:var(--muted)}
+  a.btn.primary svg{stroke:var(--gold2)}
   a.btn svg{flex:none;width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.6}
   .t{font-weight:500;font-size:15px}
   .sub{display:block;color:var(--muted);font-size:12.5px;margin-top:2px;font-weight:400}
@@ -55,7 +55,7 @@
 </head>
 <body>
 <main>
-  <div class="team" aria-hidden="true"><img src="equipo-2.webp" alt=""></div>
+  <div class="team" aria-hidden="true"><img src="equipo-3.webp" alt=""></div>
   <div class="hero"><img src="aurum-logo.png" alt="AURUM Asesores Patrimoniales"></div>
   <p class="motto">El verdadero <span class="lujo">lujo</span> <br class="br">es proteger lo que has construido</p>
   <div class="glow"></div>
