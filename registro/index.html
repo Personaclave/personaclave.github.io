@@ -153,10 +153,13 @@
 (function(){
   var KEY="aurum_prospectos_v1", WHO="aurum_asesora", CFG="aurum_hoja";
   function getCfg(){try{return JSON.parse(localStorage.getItem(CFG))||null}catch(e){return null}}
-  (function(){var h=location.hash;if(h.indexOf("conectar=")<0)return;
-    var q={};h.slice(1).split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1))});
-    if(/^https:\/\/script\.google(usercontent)?\.com\//.test(q.conectar||"")&&q.clave){try{localStorage.setItem(CFG,JSON.stringify({url:q.conectar,clave:q.clave}))}catch(e){}}
-    history.replaceState(null,"",location.pathname)})();
+  // Lee "#conectar=...&clave=..." de la dirección o de un enlace pegado. Se deja en la dirección a propósito:
+  // en iPhone, "Agregar a pantalla de inicio" guarda la dirección actual y así el ícono también queda conectado.
+  function applyLink(str){str=String(str||"");var i=str.indexOf("conectar=");if(i<0)return false;
+    var q={};str.slice(i).split("&").forEach(function(kv){var j=kv.indexOf("=");if(j>0)q[kv.slice(0,j)]=decodeURIComponent(kv.slice(j+1).trim())});
+    if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(q.conectar||"")||!q.clave)return false;
+    try{localStorage.setItem(CFG,JSON.stringify({url:q.conectar,clave:q.clave}));return true}catch(e){return false}}
+  applyLink(location.hash);
   var $=function(id){return document.getElementById(id)};
   function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
   function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}}
@@ -229,7 +232,7 @@
   var syncing=false;
   function syncUI(){
     var el=$("sync"),cfg=getCfg(),pend=recs.filter(function(r){return !r.sub}).length;
-    if(!cfg){el.className="sync";el.textContent="Esta app aún no está conectada a la hoja del CRM. Ábrela con el enlace que te mandaron.";return}
+    if(!cfg){el.className="sync pend";el.innerHTML='Esta app aún no está conectada a la hoja del CRM. <button class="link" id="paste" type="button">Pegar el enlace que te mandaron</button>';return}
     if(!pend){el.className="sync ok";el.textContent=recs.length?"Todo subido a la hoja del CRM ✓":"Conectada a la hoja del CRM ✓";return}
     el.className="sync pend";el.textContent=pend+(pend==1?" registro pendiente":" registros pendientes")+(navigator.onLine?(syncing?" · subiendo…":" · se subirán en un momento"):" · se suben solos cuando haya señal");
   }
@@ -244,6 +247,9 @@
           recs=load().map(function(r){if(got[r.id])r.sub=true;return r});save(recs);render()}
       }).catch(function(){}).then(function(){clearTimeout(tm);syncing=false;syncUI()});
   }
+  $("sync").addEventListener("click",function(e){if(!e.target.closest("#paste"))return;
+    var v=prompt("Pega aquí el enlace completo que te mandaron por WhatsApp:");if(v==null)return;
+    if(applyLink(v)){toast("Conectada a la hoja ✓");sync()}else{alert("Ese enlace no es el correcto. Copia el enlace completo que empieza con personaclave.github.io/registro/#conectar=")}});
   addEventListener("online",sync);
   document.addEventListener("visibilitychange",function(){if(!document.hidden)sync()});
   setInterval(sync,45000);
