@@ -212,11 +212,12 @@
     $("f").reset();render();toast("Guardado ✓ "+nombre);sync();scrollTo({top:0,behavior:"smooth"});
   };
 
+  var PRODS=[].map.call(document.querySelectorAll("#interes input"),function(i){return i.value});
   function csvCell(v){v=String(v==null?"":v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
   $("exp").onclick=function(){
     if(!recs.length){toast("No hay registros todavía");return}
-    var head=["Fecha y hora","Asesora","Nombre","Empresa","Celular / WhatsApp","Otro teléfono","Correo","Le interesa","Temperatura","Notas","Aviso de privacidad"];
-    var rows=[head].concat(recs.map(function(r){return [r.fecha,r.asesora,r.nombre,r.empresa,r.cel,r.tel2||"",r.mail||"",r.interes,r.temp,r.notas,r.aviso]}));
+    var head=["Fecha y hora","Asesora","Nombre","Empresa","Celular / WhatsApp","Otro teléfono","Correo"].concat(PRODS,["Temperatura","Notas","Aviso de privacidad"]);
+    var rows=[head].concat(recs.map(function(r){return [r.fecha,r.asesora,r.nombre,r.empresa,r.cel,r.tel2||"",r.mail||""].concat(PRODS.map(function(x){return (", "+r.interes+",").indexOf(", "+x+",")>=0?"✓":""}),[r.temp,r.notas,r.aviso])}));
     var csv="﻿"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
     var d=new Date(),name="prospectos-aviart-"+(getWho()||"asesora").replace(/[^\wáéíóúñ]+/gi,"-")+"-"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+".csv";
     var blob=new Blob([csv],{type:"text/csv"});
