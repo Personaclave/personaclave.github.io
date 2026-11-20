@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#070d1f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Prospectos">
+<title>Registro de prospectos</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{--bg:#070d1f;--bg2:#14204a;--card:rgba(255,255,255,.045);--line:rgba(201,169,97,.32);
+    --gold:#c9a961;--gold2:#e2cb94;--text:#f1f3f8;--muted:#9ba6c0;--ok:#5fbf8a;--bad:#e07a7a}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{min-height:100vh;color:var(--text);font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;
+    background:radial-gradient(120% 80% at 50% 0%,var(--bg2) 0%,var(--bg) 60%) fixed,var(--bg);
+    padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 32px)}
+  main{max-width:560px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+  header img{height:34px}
+  .net{font-size:12px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+  .net.on::before,.net.off::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .net.on::before{background:var(--ok)} .net.off::before{background:var(--muted)}
+  .bar{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);margin-bottom:14px}
+  .bar b{color:var(--gold2);font-weight:600}
+  .link{background:none;border:none;color:var(--gold2);font-size:14px;text-decoration:underline;cursor:pointer;padding:4px}
+  form,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
+  label.f{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+  label.f:first-child{margin-top:0}
+  input[type=text],input[type=tel],input[type=email],textarea{width:100%;font-size:17px;color:var(--text);background:rgba(0,0,0,.25);
+    border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px 13px;font-family:inherit}
+  input:focus,textarea:focus{outline:none;border-color:var(--gold)}
+  textarea{min-height:70px;resize:vertical}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips input{position:absolute;opacity:0;pointer-events:none}
+  .chips label{flex:1 1 40%;text-align:center;font-size:15px;padding:11px 12px;border-radius:10px;
+    border:1px solid rgba(255,255,255,.16);cursor:pointer;user-select:none}
+  #temp label{flex-basis:25%}
+  .chips input:checked + label{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent;font-weight:600}
+  .chips input:focus-visible + label{outline:2px solid var(--gold2)}
+  .check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;color:var(--muted);line-height:1.4}
+  .check input{width:22px;height:22px;flex:none;accent-color:var(--gold)}
+  .btn{display:block;width:100%;font-size:17px;font-weight:600;padding:15px;border-radius:12px;border:none;cursor:pointer;margin-top:18px;
+    background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128}
+  .btn.sec{background:transparent;color:var(--gold2);border:1px solid var(--line);font-weight:500}
+  .err{color:var(--bad);font-size:13px;margin-top:10px;min-height:1em}
+  h2{font-size:15px;font-weight:600;color:var(--gold2);margin:26px 0 10px;letter-spacing:.3px}
+  .item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-top:1px solid rgba(255,255,255,.08);font-size:14px}
+  .item:first-child{border-top:none}
+  .item small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .tag{font-size:11px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--gold2);margin-left:6px}
+  .del{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;padding:0 4px;align-self:center}
+  .empty{color:var(--muted);font-size:14px;text-align:center;padding:8px 0}
+  .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%) translateY(120px);
+    background:#0f1a3a;border:1px solid var(--gold);color:var(--text);padding:12px 18px;border-radius:12px;font-size:15px;transition:transform .25s;z-index:9}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .dlg{position:fixed;inset:0;background:rgba(3,6,16,.85);display:none;align-items:center;justify-content:center;padding:16px;z-index:8}
+  .dlg.show{display:flex}
+  .dlg .panel{width:100%;max-width:420px;background:#0f1a3a}
+  .dlg p{color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:12px}
+  .sync{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:14px;border:1px solid var(--line);color:var(--muted)}
+  .sync.ok{border-color:rgba(95,191,138,.5);color:#bfe8cf}
+  .sync.pend{border-color:rgba(226,203,148,.6);color:var(--gold2)}
+  .st{font-size:12px;margin-left:6px}
+  .whos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .whos .btn{margin-top:0}
+  .whos .btn.on{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent;font-weight:600}
+  .hint{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:12px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="../aurum-logo.png" alt="AURUM">
+    <span id="net" class="net">…</span>
+  </header>
+
+  <div class="bar"><span>Asesora: <b id="who">—</b> <button class="link" id="chg" type="button">cambiar</button></span><span><b id="count">0</b> capturados</span></div>
+
+  <div class="sync" id="sync">…</div>
+
+  <form id="f" novalidate autocomplete="off">
+    <label class="f" for="nombre">Nombre *</label>
+    <input type="text" id="nombre" autocapitalize="words" enterkeyhint="next">
+    <label class="f" for="empresa">Empresa</label>
+    <input type="text" id="empresa" autocapitalize="words" enterkeyhint="next">
+    <label class="f" for="cel">Celular / WhatsApp *</label>
+    <input type="tel" id="cel" inputmode="tel" placeholder="10 dígitos" enterkeyhint="next">
+    <label class="f" for="tel2">Otro teléfono</label>
+    <input type="tel" id="tel2" inputmode="tel" placeholder="Opcional" enterkeyhint="next">
+    <label class="f" for="mail">Correo</label>
+    <input type="email" id="mail" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Opcional" enterkeyhint="done">
+
+    <label class="f">Le interesa *</label>
+    <div class="chips" id="interes">
+      <input type="checkbox" id="i1" value="Persona Clave"><label for="i1">Persona Clave</label>
+      <input type="checkbox" id="i2" value="PPR"><label for="i2">PPR</label>
+      <input type="checkbox" id="i3" value="Educación"><label for="i3">Educación</label>
+      <input type="checkbox" id="i4" value="Seguro de vida"><label for="i4">Seguro de vida</label>
+    </div>
+
+    <label class="f">Temperatura *</label>
+    <div class="chips" id="temp">
+      <input type="radio" name="t" id="t1" value="Caliente"><label for="t1">Caliente</label>
+      <input type="radio" name="t" id="t2" value="Tibia"><label for="t2">Tibia</label>
+      <input type="radio" name="t" id="t3" value="Fría"><label for="t3">Fría</label>
+    </div>
+
+    <label class="f" for="notas">Notas</label>
+    <textarea id="notas" placeholder="Lo que comentó, socios, cuándo llamarle…"></textarea>
+
+    <label class="check"><input type="checkbox" id="aviso"><span>Se le informó el aviso de privacidad y aceptó que lo contactemos.</span></label>
+
+    <div class="err" id="err" role="alert"></div>
+    <button class="btn" type="submit">Guardar prospecto</button>
+  </form>
+
+  <h2>Capturados en este dispositivo</h2>
+  <div class="panel"><div id="list"></div>
+    <button class="btn sec" id="exp" type="button">Descargar respaldo (Excel / CSV)</button>
+    <p class="hint">Cada registro se guarda primero en este dispositivo, aunque no haya internet, y se sube solo a la hoja del CRM en cuanto hay señal (✓ = ya está en la hoja). El respaldo es opcional, por si algo falla.</p>
+  </div>
+</main>
+
+<div class="dlg" id="dlgWho"><div class="panel">
+  <h2 style="margin-top:0">¿Quién eres?</h2>
+  <p>Tu nombre queda en cada prospecto que captures en este dispositivo.</p>
+  <div class="whos" id="whos">
+    <button class="btn sec" type="button">Rocío</button>
+    <button class="btn sec" type="button">Karina</button>
+    <button class="btn sec" type="button">Yolen</button>
+    <button class="btn sec" type="button">Marisol</button>
+  </div>
+</div></div>
+
+<div class="dlg" id="dlgDel"><div class="panel">
+  <h2 style="margin-top:0">¿Borrar este registro?</h2>
+  <p id="delTxt"></p>
+  <button class="btn" id="delOk" type="button">Sí, borrar</button>
+  <button class="btn sec" id="delNo" type="button">Cancelar</button>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var KEY="aurum_prospectos_v1", WHO="aurum_asesora", CFG="aurum_hoja";
+  function getCfg(){try{return JSON.parse(localStorage.getItem(CFG))||null}catch(e){return null}}
+  (function(){var h=location.hash;if(h.indexOf("conectar=")<0)return;
+    var q={};h.slice(1).split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1))});
+    if(/^https:\/\/script\.google(usercontent)?\.com\//.test(q.conectar||"")&&q.clave){try{localStorage.setItem(CFG,JSON.stringify({url:q.conectar,clave:q.clave}))}catch(e){}}
+    history.replaceState(null,"",location.pathname)})();
+  var $=function(id){return document.getElementById(id)};
+  function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
+  function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}}
+  function getWho(){try{return localStorage.getItem(WHO)||""}catch(e){return ""}}
+  var recs=load(), pendingDel=null;
+
+  if(navigator.storage&&navigator.storage.persist){navigator.storage.persist().catch(function(){})}
+  if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){})}
+
+  function net(){var on=navigator.onLine;$("net").className="net "+(on?"on":"off");$("net").textContent=on?"Con internet":"Sin internet · guardando local"}
+  addEventListener("online",net);addEventListener("offline",net);net();
+
+  function toast(t){var el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},2200)}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+
+  function showWho(){var w=getWho();[].forEach.call($("whos").children,function(b){b.classList.toggle("on",b.textContent===w)});$("dlgWho").classList.add("show")}
+  $("whos").onclick=function(e){var b=e.target.closest("button");if(!b)return;var v=b.textContent;try{localStorage.setItem(WHO,v)}catch(e){};$("who").textContent=v;$("dlgWho").classList.remove("show")};
+  $("chg").onclick=showWho;
+  $("who").textContent=getWho()||"—"; if(!getWho())showWho();
+
+  function render(){
+    $("count").textContent=recs.length;syncUI();
+    if(!recs.length){$("list").innerHTML='<div class="empty">Aún no hay registros.</div>';return}
+    $("list").innerHTML=recs.slice().reverse().map(function(r){
+      return '<div class="item"><div><b>'+esc(r.nombre)+'</b><span class="tag">'+esc(r.temp)+'</span><span class="st">'+(r.sub?'✓':'⏳')+'</span><small>'+(r.empresa?esc(r.empresa)+' · ':'')+esc(r.cel)+'</small><small>'+esc(r.interes)+' · '+esc(r.fecha)+'</small></div><button class="del" data-id="'+r.id+'" aria-label="Borrar">×</button></div>'}).join("");
+  }
+  $("list").onclick=function(e){var b=e.target.closest(".del");if(!b)return;pendingDel=b.getAttribute("data-id");
+    var r=recs.filter(function(x){return x.id==pendingDel})[0];$("delTxt").textContent=r?r.nombre+(r.empresa?" · "+r.empresa:""):"";$("dlgDel").classList.add("show")};
+  $("delNo").onclick=function(){$("dlgDel").classList.remove("show")};
+  $("delOk").onclick=function(){recs=recs.filter(function(x){return x.id!=pendingDel});save(recs);render();$("dlgDel").classList.remove("show")};
+
+  function pad(n){return (n<10?"0":"")+n}
+  function stamp(d){return pad(d.getDate())+"/"+pad(d.getMonth()+1)+"/"+d.getFullYear()+" "+pad(d.getHours())+":"+pad(d.getMinutes())}
+
+  $("f").onsubmit=function(e){
+    e.preventDefault();
+    var nombre=$("nombre").value.trim(),empresa=$("empresa").value.trim(),cel=$("cel").value.replace(/\D/g,""),tel2=$("tel2").value.replace(/\D/g,""),mail=$("mail").value.trim();
+    var interes=[].slice.call(document.querySelectorAll("#interes input:checked")).map(function(i){return i.value});
+    var t=document.querySelector("#temp input:checked");
+    var miss=[];
+    if(!nombre)miss.push("nombre");
+    if(cel.length<10)miss.push("celular de 10 dígitos");
+    if(tel2&&tel2.length<10)miss.push("otro teléfono de 10 dígitos");
+    if(mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail))miss.push("correo válido");
+    if(!interes.length)miss.push("interés");if(!t)miss.push("temperatura");
+    if(!$("aviso").checked)miss.push("aviso de privacidad");
+    if(miss.length){$("err").textContent="Revisa: "+miss.join(", ")+".";return}
+    $("err").textContent="";
+    if(!getWho()){showWho();return}
+    var d=new Date();
+    recs.push({id:d.getTime(),fecha:stamp(d),asesora:getWho(),nombre:nombre,empresa:empresa,cel:cel,tel2:tel2,mail:mail,interes:interes.join(", "),temp:t.value,notas:$("notas").value.trim(),aviso:"Sí"});
+    if(!save(recs)){recs.pop();$("err").textContent="No se pudo guardar. Revisa que no estés en modo privado.";return}
+    $("f").reset();render();toast("Guardado ✓ "+nombre);sync();scrollTo({top:0,behavior:"smooth"});
+  };
+
+  function csvCell(v){v=String(v==null?"":v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
+  $("exp").onclick=function(){
+    if(!recs.length){toast("No hay registros todavía");return}
+    var head=["Fecha y hora","Asesora","Nombre","Empresa","Celular / WhatsApp","Otro teléfono","Correo","Le interesa","Temperatura","Notas","Aviso de privacidad"];
+    var rows=[head].concat(recs.map(function(r){return [r.fecha,r.asesora,r.nombre,r.empresa,r.cel,r.tel2||"",r.mail||"",r.interes,r.temp,r.notas,r.aviso]}));
+    var csv="﻿"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
+    var d=new Date(),name="prospectos-aviart-"+(getWho()||"asesora").replace(/[^\wáéíóúñ]+/gi,"-")+"-"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+".csv";
+    var blob=new Blob([csv],{type:"text/csv"});
+    try{var file=new File([blob],name,{type:"text/csv"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:name}).catch(function(){});return}}catch(e){}
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
+  };
+  var syncing=false;
+  function syncUI(){
+    var el=$("sync"),cfg=getCfg(),pend=recs.filter(function(r){return !r.sub}).length;
+    if(!cfg){el.className="sync";el.textContent="Esta app aún no está conectada a la hoja del CRM. Ábrela con el enlace que te mandaron.";return}
+    if(!pend){el.className="sync ok";el.textContent=recs.length?"Todo subido a la hoja del CRM ✓":"Conectada a la hoja del CRM ✓";return}
+    el.className="sync pend";el.textContent=pend+(pend==1?" registro pendiente":" registros pendientes")+(navigator.onLine?(syncing?" · subiendo…":" · se subirán en un momento"):" · se suben solos cuando haya señal");
+  }
+  function sync(){
+    var cfg=getCfg();if(!cfg||syncing||!navigator.onLine){syncUI();return}
+    var pend=recs.filter(function(r){return !r.sub});if(!pend.length){syncUI();return}
+    syncing=true;syncUI();
+    var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){ctl&&ctl.abort()},25000);
+    fetch(cfg.url,{method:"POST",body:JSON.stringify({clave:cfg.clave,registros:pend}),signal:ctl&&ctl.signal})
+      .then(function(r){return r.json()}).then(function(j){
+        if(j&&j.ok&&j.recibidos){var got={};j.recibidos.forEach(function(id){got[id]=1});
+          recs=load().map(function(r){if(got[r.id])r.sub=true;return r});save(recs);render()}
+      }).catch(function(){}).then(function(){clearTimeout(tm);syncing=false;syncUI()});
+  }
+  addEventListener("online",sync);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)sync()});
+  setInterval(sync,45000);
+  render();sync();
+})();
+</script>
+</body>
+</html>
