@@ -66,6 +66,9 @@
   .sync.ok{border-color:rgba(95,191,138,.5);color:#bfe8cf}
   .sync.pend{border-color:rgba(226,203,148,.6);color:var(--gold2)}
   .st{font-size:12px;margin-left:6px}
+  .whos{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .whos .btn{margin-top:0}
+  .whos .btn.on{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent;font-weight:600}
   .hint{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:12px}
 </style>
 </head>
@@ -124,10 +127,14 @@
 </main>
 
 <div class="dlg" id="dlgWho"><div class="panel">
-  <h2 style="margin-top:0">¿Quién captura en este dispositivo?</h2>
-  <p>Se guarda en cada registro para saber quién atendió al prospecto.</p>
-  <input type="text" id="whoIn" placeholder="Tu nombre" autocapitalize="words">
-  <button class="btn" id="whoOk" type="button">Listo</button>
+  <h2 style="margin-top:0">¿Quién eres?</h2>
+  <p>Tu nombre queda en cada prospecto que captures en este dispositivo.</p>
+  <div class="whos" id="whos">
+    <button class="btn sec" type="button">Rocío</button>
+    <button class="btn sec" type="button">Karina</button>
+    <button class="btn sec" type="button">Yolen</button>
+    <button class="btn sec" type="button">Marisol</button>
+  </div>
 </div></div>
 
 <div class="dlg" id="dlgDel"><div class="panel">
@@ -162,8 +169,8 @@
   function toast(t){var el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(el._t);el._t=setTimeout(function(){el.classList.remove("show")},2200)}
   function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
 
-  function showWho(){$("whoIn").value=getWho();$("dlgWho").classList.add("show");setTimeout(function(){$("whoIn").focus()},50)}
-  $("whoOk").onclick=function(){var v=$("whoIn").value.trim();if(!v)return;try{localStorage.setItem(WHO,v)}catch(e){};$("who").textContent=v;$("dlgWho").classList.remove("show")};
+  function showWho(){var w=getWho();[].forEach.call($("whos").children,function(b){b.classList.toggle("on",b.textContent===w)});$("dlgWho").classList.add("show")}
+  $("whos").onclick=function(e){var b=e.target.closest("button");if(!b)return;var v=b.textContent;try{localStorage.setItem(WHO,v)}catch(e){};$("who").textContent=v;$("dlgWho").classList.remove("show")};
   $("chg").onclick=showWho;
   $("who").textContent=getWho()||"—"; if(!getWho())showWho();
 
