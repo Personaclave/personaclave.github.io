@@ -61,6 +61,10 @@
   .dlg.show{display:flex}
   .dlg .panel{width:100%;max-width:420px;background:#0f1a3a}
   .dlg p{color:var(--muted);font-size:14px;line-height:1.45;margin-bottom:12px}
+  .sync{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:14px;border:1px solid var(--line);color:var(--muted)}
+  .sync.ok{border-color:rgba(95,191,138,.5);color:#bfe8cf}
+  .sync.pend{border-color:rgba(226,203,148,.6);color:var(--gold2)}
+  .st{font-size:12px;margin-left:6px}
   .hint{color:var(--muted);font-size:12.5px;line-height:1.45;margin-top:12px}
 </style>
 </head>
@@ -72,6 +76,8 @@
   </header>
 
   <div class="bar"><span>Asesora: <b id="who">—</b> <button class="link" id="chg" type="button">cambiar</button></span><span><b id="count">0</b> capturados</span></div>
+
+  <div class="sync" id="sync">…</div>
 
   <form id="f" novalidate autocomplete="off">
     <label class="f" for="nombre">Nombre *</label>
@@ -106,8 +112,8 @@
 
   <h2>Capturados en este dispositivo</h2>
   <div class="panel"><div id="list"></div>
-    <button class="btn" id="exp" type="button">Enviar registros (Excel / CSV)</button>
-    <p class="hint">Los registros se guardan solo en este celular o iPad, aunque no haya internet. Al final de cada día toca <b>Enviar registros</b> y mándate el archivo por WhatsApp o correo para subirlo a la hoja del CRM.</p>
+    <button class="btn sec" id="exp" type="button">Descargar respaldo (Excel / CSV)</button>
+    <p class="hint">Cada registro se guarda primero en este dispositivo, aunque no haya internet, y se sube solo a la hoja del CRM en cuanto hay señal (✓ = ya está en la hoja). El respaldo es opcional, por si algo falla.</p>
   </div>
 </main>
 
@@ -129,7 +135,12 @@
 
 <script>
 (function(){
-  var KEY="aurum_prospectos_v1", WHO="aurum_asesora";
+  var KEY="aurum_prospectos_v1", WHO="aurum_asesora", CFG="aurum_hoja";
+  function getCfg(){try{return JSON.parse(localStorage.getItem(CFG))||null}catch(e){return null}}
+  (function(){var h=location.hash;if(h.indexOf("conectar=")<0)return;
+    var q={};h.slice(1).split("&").forEach(function(kv){var i=kv.indexOf("=");if(i>0)q[kv.slice(0,i)]=decodeURIComponent(kv.slice(i+1))});
+    if(/^https:\/\/script\.google(usercontent)?\.com\//.test(q.conectar||"")&&q.clave){try{localStorage.setItem(CFG,JSON.stringify({url:q.conectar,clave:q.clave}))}catch(e){}}
+    history.replaceState(null,"",location.pathname)})();
   var $=function(id){return document.getElementById(id)};
   function load(){try{return JSON.parse(localStorage.getItem(KEY))||[]}catch(e){return []}}
   function save(a){try{localStorage.setItem(KEY,JSON.stringify(a));return true}catch(e){return false}}
@@ -151,10 +162,10 @@
   $("who").textContent=getWho()||"—"; if(!getWho())showWho();
 
   function render(){
-    $("count").textContent=recs.length;
+    $("count").textContent=recs.length;syncUI();
     if(!recs.length){$("list").innerHTML='<div class="empty">Aún no hay registros.</div>';return}
     $("list").innerHTML=recs.slice().reverse().map(function(r){
-      return '<div class="item"><div><b>'+esc(r.nombre)+'</b><span class="tag">'+esc(r.temp)+'</span><small>'+esc(r.empresa)+' · '+esc(r.cel)+'</small><small>'+esc(r.interes)+' · '+esc(r.fecha)+'</small></div><button class="del" data-id="'+r.id+'" aria-label="Borrar">×</button></div>'}).join("");
+      return '<div class="item"><div><b>'+esc(r.nombre)+'</b><span class="tag">'+esc(r.temp)+'</span><span class="st">'+(r.sub?'✓':'⏳')+'</span><small>'+esc(r.empresa)+' · '+esc(r.cel)+'</small><small>'+esc(r.interes)+' · '+esc(r.fecha)+'</small></div><button class="del" data-id="'+r.id+'" aria-label="Borrar">×</button></div>'}).join("");
   }
   $("list").onclick=function(e){var b=e.target.closest(".del");if(!b)return;pendingDel=b.getAttribute("data-id");
     var r=recs.filter(function(x){return x.id==pendingDel})[0];$("delTxt").textContent=r?r.nombre+" · "+r.empresa:"";$("dlgDel").classList.add("show")};
@@ -180,7 +191,7 @@
     var d=new Date();
     recs.push({id:d.getTime(),fecha:stamp(d),asesora:getWho(),nombre:nombre,empresa:empresa,cel:cel,interes:interes.join(", "),temp:t.value,notas:$("notas").value.trim(),aviso:"Sí"});
     if(!save(recs)){recs.pop();$("err").textContent="No se pudo guardar. Revisa que no estés en modo privado.";return}
-    $("f").reset();render();toast("Guardado ✓ "+nombre);scrollTo({top:0,behavior:"smooth"});
+    $("f").reset();render();toast("Guardado ✓ "+nombre);sync();scrollTo({top:0,behavior:"smooth"});
   };
 
   function csvCell(v){v=String(v==null?"":v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
@@ -196,7 +207,28 @@
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
   };
-  render();
+  var syncing=false;
+  function syncUI(){
+    var el=$("sync"),cfg=getCfg(),pend=recs.filter(function(r){return !r.sub}).length;
+    if(!cfg){el.className="sync";el.textContent="Esta app aún no está conectada a la hoja del CRM. Ábrela con el enlace que te mandaron.";return}
+    if(!pend){el.className="sync ok";el.textContent=recs.length?"Todo subido a la hoja del CRM ✓":"Conectada a la hoja del CRM ✓";return}
+    el.className="sync pend";el.textContent=pend+(pend==1?" registro pendiente":" registros pendientes")+(navigator.onLine?(syncing?" · subiendo…":" · se subirán en un momento"):" · se suben solos cuando haya señal");
+  }
+  function sync(){
+    var cfg=getCfg();if(!cfg||syncing||!navigator.onLine){syncUI();return}
+    var pend=recs.filter(function(r){return !r.sub});if(!pend.length){syncUI();return}
+    syncing=true;syncUI();
+    var ctl=window.AbortController?new AbortController():null,tm=setTimeout(function(){ctl&&ctl.abort()},25000);
+    fetch(cfg.url,{method:"POST",body:JSON.stringify({clave:cfg.clave,registros:pend}),signal:ctl&&ctl.signal})
+      .then(function(r){return r.json()}).then(function(j){
+        if(j&&j.ok&&j.recibidos){var got={};j.recibidos.forEach(function(id){got[id]=1});
+          recs=load().map(function(r){if(got[r.id])r.sub=true;return r});save(recs);render()}
+      }).catch(function(){}).then(function(){clearTimeout(tm);syncing=false;syncUI()});
+  }
+  addEventListener("online",sync);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)sync()});
+  setInterval(sync,45000);
+  render();sync();
 })();
 </script>
 </body>
