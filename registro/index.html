@@ -31,7 +31,7 @@
   form,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px}
   label.f{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
   label.f:first-child{margin-top:0}
-  input[type=text],input[type=tel],textarea{width:100%;font-size:17px;color:var(--text);background:rgba(0,0,0,.25);
+  input[type=text],input[type=tel],input[type=email],textarea{width:100%;font-size:17px;color:var(--text);background:rgba(0,0,0,.25);
     border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:12px 13px;font-family:inherit}
   input:focus,textarea:focus{outline:none;border-color:var(--gold)}
   textarea{min-height:70px;resize:vertical}
@@ -83,10 +83,14 @@
   <form id="f" novalidate autocomplete="off">
     <label class="f" for="nombre">Nombre *</label>
     <input type="text" id="nombre" autocapitalize="words" enterkeyhint="next">
-    <label class="f" for="empresa">Empresa *</label>
+    <label class="f" for="empresa">Empresa</label>
     <input type="text" id="empresa" autocapitalize="words" enterkeyhint="next">
     <label class="f" for="cel">Celular / WhatsApp *</label>
-    <input type="tel" id="cel" inputmode="tel" placeholder="10 dígitos" enterkeyhint="done">
+    <input type="tel" id="cel" inputmode="tel" placeholder="10 dígitos" enterkeyhint="next">
+    <label class="f" for="tel2">Otro teléfono</label>
+    <input type="tel" id="tel2" inputmode="tel" placeholder="Opcional" enterkeyhint="next">
+    <label class="f" for="mail">Correo</label>
+    <input type="email" id="mail" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Opcional" enterkeyhint="done">
 
     <label class="f">Le interesa *</label>
     <div class="chips" id="interes">
@@ -167,10 +171,10 @@
     $("count").textContent=recs.length;syncUI();
     if(!recs.length){$("list").innerHTML='<div class="empty">Aún no hay registros.</div>';return}
     $("list").innerHTML=recs.slice().reverse().map(function(r){
-      return '<div class="item"><div><b>'+esc(r.nombre)+'</b><span class="tag">'+esc(r.temp)+'</span><span class="st">'+(r.sub?'✓':'⏳')+'</span><small>'+esc(r.empresa)+' · '+esc(r.cel)+'</small><small>'+esc(r.interes)+' · '+esc(r.fecha)+'</small></div><button class="del" data-id="'+r.id+'" aria-label="Borrar">×</button></div>'}).join("");
+      return '<div class="item"><div><b>'+esc(r.nombre)+'</b><span class="tag">'+esc(r.temp)+'</span><span class="st">'+(r.sub?'✓':'⏳')+'</span><small>'+(r.empresa?esc(r.empresa)+' · ':'')+esc(r.cel)+'</small><small>'+esc(r.interes)+' · '+esc(r.fecha)+'</small></div><button class="del" data-id="'+r.id+'" aria-label="Borrar">×</button></div>'}).join("");
   }
   $("list").onclick=function(e){var b=e.target.closest(".del");if(!b)return;pendingDel=b.getAttribute("data-id");
-    var r=recs.filter(function(x){return x.id==pendingDel})[0];$("delTxt").textContent=r?r.nombre+" · "+r.empresa:"";$("dlgDel").classList.add("show")};
+    var r=recs.filter(function(x){return x.id==pendingDel})[0];$("delTxt").textContent=r?r.nombre+(r.empresa?" · "+r.empresa:""):"";$("dlgDel").classList.add("show")};
   $("delNo").onclick=function(){$("dlgDel").classList.remove("show")};
   $("delOk").onclick=function(){recs=recs.filter(function(x){return x.id!=pendingDel});save(recs);render();$("dlgDel").classList.remove("show")};
 
@@ -179,19 +183,21 @@
 
   $("f").onsubmit=function(e){
     e.preventDefault();
-    var nombre=$("nombre").value.trim(),empresa=$("empresa").value.trim(),cel=$("cel").value.replace(/\D/g,"");
+    var nombre=$("nombre").value.trim(),empresa=$("empresa").value.trim(),cel=$("cel").value.replace(/\D/g,""),tel2=$("tel2").value.replace(/\D/g,""),mail=$("mail").value.trim();
     var interes=[].slice.call(document.querySelectorAll("#interes input:checked")).map(function(i){return i.value});
     var t=document.querySelector("#temp input:checked");
     var miss=[];
-    if(!nombre)miss.push("nombre");if(!empresa)miss.push("empresa");
+    if(!nombre)miss.push("nombre");
     if(cel.length<10)miss.push("celular de 10 dígitos");
+    if(tel2&&tel2.length<10)miss.push("otro teléfono de 10 dígitos");
+    if(mail&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail))miss.push("correo válido");
     if(!interes.length)miss.push("interés");if(!t)miss.push("temperatura");
     if(!$("aviso").checked)miss.push("aviso de privacidad");
-    if(miss.length){$("err").textContent="Falta: "+miss.join(", ")+".";return}
+    if(miss.length){$("err").textContent="Revisa: "+miss.join(", ")+".";return}
     $("err").textContent="";
     if(!getWho()){showWho();return}
     var d=new Date();
-    recs.push({id:d.getTime(),fecha:stamp(d),asesora:getWho(),nombre:nombre,empresa:empresa,cel:cel,interes:interes.join(", "),temp:t.value,notas:$("notas").value.trim(),aviso:"Sí"});
+    recs.push({id:d.getTime(),fecha:stamp(d),asesora:getWho(),nombre:nombre,empresa:empresa,cel:cel,tel2:tel2,mail:mail,interes:interes.join(", "),temp:t.value,notas:$("notas").value.trim(),aviso:"Sí"});
     if(!save(recs)){recs.pop();$("err").textContent="No se pudo guardar. Revisa que no estés en modo privado.";return}
     $("f").reset();render();toast("Guardado ✓ "+nombre);sync();scrollTo({top:0,behavior:"smooth"});
   };
@@ -199,8 +205,8 @@
   function csvCell(v){v=String(v==null?"":v);return /[",\n;]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}
   $("exp").onclick=function(){
     if(!recs.length){toast("No hay registros todavía");return}
-    var head=["Fecha y hora","Asesora","Nombre","Empresa","Celular / WhatsApp","Le interesa","Temperatura","Notas","Aviso de privacidad"];
-    var rows=[head].concat(recs.map(function(r){return [r.fecha,r.asesora,r.nombre,r.empresa,r.cel,r.interes,r.temp,r.notas,r.aviso]}));
+    var head=["Fecha y hora","Asesora","Nombre","Empresa","Celular / WhatsApp","Otro teléfono","Correo","Le interesa","Temperatura","Notas","Aviso de privacidad"];
+    var rows=[head].concat(recs.map(function(r){return [r.fecha,r.asesora,r.nombre,r.empresa,r.cel,r.tel2||"",r.mail||"",r.interes,r.temp,r.notas,r.aviso]}));
     var csv="﻿"+rows.map(function(r){return r.map(csvCell).join(",")}).join("\r\n");
     var d=new Date(),name="prospectos-aviart-"+(getWho()||"asesora").replace(/[^\wáéíóúñ]+/gi,"-")+"-"+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"-"+pad(d.getHours())+pad(d.getMinutes())+".csv";
     var blob=new Blob([csv],{type:"text/csv"});
