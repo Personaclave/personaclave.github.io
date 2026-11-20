@@ -37,8 +37,9 @@
   textarea{min-height:70px;resize:vertical}
   .chips{display:flex;flex-wrap:wrap;gap:8px}
   .chips input{position:absolute;opacity:0;pointer-events:none}
-  .chips label{flex:1 1 auto;text-align:center;font-size:15px;padding:11px 12px;border-radius:10px;
+  .chips label{flex:1 1 40%;text-align:center;font-size:15px;padding:11px 12px;border-radius:10px;
     border:1px solid rgba(255,255,255,.16);cursor:pointer;user-select:none}
+  #temp label{flex-basis:25%}
   .chips input:checked + label{background:linear-gradient(135deg,#d9bc78,#a8823c);color:#0a1128;border-color:transparent;font-weight:600}
   .chips input:focus-visible + label{outline:2px solid var(--gold2)}
   .check{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;color:var(--muted);line-height:1.4}
@@ -89,9 +90,10 @@
 
     <label class="f">Le interesa *</label>
     <div class="chips" id="interes">
-      <input type="checkbox" id="i1" value="Hombre Clave"><label for="i1">Hombre Clave</label>
-      <input type="checkbox" id="i2" value="Seguro de vida"><label for="i2">Seguro de vida</label>
-      <input type="checkbox" id="i3" value="Ahorro deducible"><label for="i3">Ahorro deducible</label>
+      <input type="checkbox" id="i1" value="Persona Clave"><label for="i1">Persona Clave</label>
+      <input type="checkbox" id="i2" value="PPR"><label for="i2">PPR</label>
+      <input type="checkbox" id="i3" value="Educación"><label for="i3">Educación</label>
+      <input type="checkbox" id="i4" value="Seguro de vida"><label for="i4">Seguro de vida</label>
     </div>
 
     <label class="f">Temperatura *</label>
